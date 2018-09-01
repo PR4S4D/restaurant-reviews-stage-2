@@ -1,10 +1,13 @@
-var CACHE_NAME = "restaurant-review-cache-2";
+var CACHE_NAME = "restaurant-review-cache-8";
 var urlsToCache = [
   "/",
-  "index.html",
+  "/index.html",
   "/restaurant.html",
   "/css/main.css",
-  "/js/all.css",
+  "/js/main.js",
+  "/js/register.js",
+  "/js/dbhelper.js",
+  "/js/restaurant_info.js",
   "https://unpkg.com/leaflet@1.3.1/dist/leaflet.css",
   "https://unpkg.com/leaflet@1.3.1/dist/leaflet.js",
   "/img/1_1x.jpg",
@@ -26,7 +29,7 @@ var urlsToCache = [
   "/img/7_2x.jpg",
   "/img/8_2x.jpg",
   "/img/9_2x.jpg",
-  "/img/10_2x.jpg"
+  "/img/10_2x.jpg",
 ];
 
 self.addEventListener("install", function(event) {
@@ -47,7 +50,7 @@ self.addEventListener("fetch", function(event) {
       }
 
       var fetchRequest = event.request.clone();
-
+      console.log(fetchRequest);
       return fetch(fetchRequest).then(function(response) {
         // Check if we received a valid response
         if (!response || response.status !== 200 || response.type !== "basic") {
@@ -56,9 +59,11 @@ self.addEventListener("fetch", function(event) {
 
         var responseToCache = response.clone();
 
-        caches.open(CACHE_NAME).then(function(cache) {
-          cache.put(event.request, responseToCache);
-        });
+        if(fetchRequest.method === "GET"){
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(event.request, responseToCache);
+          });
+        }
 
         return response;
       });
