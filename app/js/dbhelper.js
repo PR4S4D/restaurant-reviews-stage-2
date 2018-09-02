@@ -1,3 +1,4 @@
+const RESTAURANTS = "restaurants";
 /**
  * Common database helper functions.
  */
@@ -15,20 +16,20 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open("GET", DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) {
-        // Got a success response from server!
-        const restaurants = JSON.parse(xhr.responseText);
-        callback(null, restaurants);
-      } else {
-        // Oops!. Got an error from server.
-        const error = `Request failed. Returned status of ${xhr.status}`;
-        callback(error, null);
-      }
-    };
-    xhr.send();
+    showCachedMessages(callback).then(() => {
+      fetch(this.DATABASE_URL)
+        .then(response => {
+          if (response.status !== 200) {
+            callback("API call failed", null);
+            return;
+          }
+          response.json().then(data => {
+            updateCache(data);
+            callback(null, data);
+          });
+        })
+        .catch(error => callback(error, null));
+    });
   }
 
   /**
@@ -164,7 +165,7 @@ class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    let image = restaurant.photograph ?  restaurant.photograph :'default';
+    let image = restaurant.photograph ? restaurant.photograph : "default";
     let imagePath = `/img/${image}`;
     let imgExtension = "jpg";
     let imageSuffix = "_2x.";
@@ -194,3 +195,59 @@ class DBHelper {
     return marker;
   }
 }
+
+/* Index Db start */
+
+updateCache = restaurants => {
+  if (!restaurants) {
+    console.log("No data to update");
+  }
+
+  getDBPromise().then(db => {
+    let tx = db.transaction(RESTAURANTS, "readwrite");
+    let store = tx.objectStore(RESTAURANTS);
+    restaurants.map(data => store.put(data));
+
+    //Delete old restaurants data
+    store
+      .index("updateAt")
+      .openCursor(null, "prev")
+      .then(cursor => {
+        if (!cursor) return;
+        return cursor.advance(30);
+      })
+      .then(function deleteRest(cursor) {
+        if (!cursor) return;
+
+        cursor.delete();
+        return cursor.continue().then(deleteRest);
+      });
+  });
+};
+
+getDBPromise = () => {
+  //Making sure serviceWorker is supported by the browser
+  if (!navigator.serviceWorker || !("indexedDB" in window)) {
+    return Promise.resolve();
+  }
+
+  return idb.open("restaurants-db", 2, upgradeDB => {
+    let store = upgradeDB.createObjectStore(RESTAURANTS, { keyPath: "id" });
+    store.createIndex("updateAt", "updatedAt");
+  });
+};
+
+showCachedMessages = callback => {
+  getDBPromise().then(db => {
+    let index = db
+      .transaction(RESTAURANTS)
+      .objectStore(RESTAURANTS)
+      .index("updateAt");
+    return index.getAll().then(restaurants => {
+      if (!restaurants) callback(null, restaurants);
+    });
+  });
+  return Promise.resolve();
+};
+
+/* Index Db end */
