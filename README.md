@@ -6,7 +6,7 @@ This app is accessible to all the users and it uses PWA and indexDB for better o
 
 ## Getting Started
 
--Installing dependencies
+Installing dependencies
 
 ```
 npm install
@@ -14,13 +14,13 @@ cd restaurants-api
 npm install
 ```
 
-- Starting the backend server
+Starting the backend server
 
 ```
 npm run backend
 ```
 
-- Starting the front-end server
+Starting the front-end server
 
 ```
 #development server
