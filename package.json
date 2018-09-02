@@ -36,5 +36,8 @@
     "gulp-uglify-es": "^1.0.4",
     "gulp-watch": "^5.0.1",
     "uglify-es": "^3.3.9"
+  },
+  "dependencies": {
+    "lozad": "^1.6.0"
   }
 }

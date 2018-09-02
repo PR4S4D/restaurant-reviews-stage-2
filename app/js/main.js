@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", event => {
   initMap(); // added
   fetchNeighborhoods();
   fetchCuisines();
+  lazyLoading();
 });
 
 /**
@@ -164,6 +165,7 @@ createRestaurantHTML = restaurant => {
   image.className = "restaurant-img";
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
   image.setAttribute("alt", restaurant.name);
+  image.setAttribute("class", "lozad");
   li.append(image);
 
   const name = document.createElement("h2");
@@ -200,4 +202,9 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     }
     self.markers.push(marker);
   });
+};
+
+lazyLoading = () => {
+  const observer = lozad(); // lazy loads elements with default selector as '.lozad'
+  observer.observe();
 };
