@@ -10,9 +10,9 @@ var urlsToCache = [
   "/js/restaurant_info.js",
   "https://unpkg.com/leaflet@1.3.1/dist/leaflet.css",
   "https://unpkg.com/leaflet@1.3.1/dist/leaflet.js",
+  "https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js",
   "https://cdn.jsdelivr.net/npm/idb@2.1.3/lib/idb.min.js",
-  "https://cdn.jsdelivr.net/npm/idb@2.1.3/lib/idb.min.js",
-  "img/icon.png",
+  "/img/icon.png",
   "/img/1_1x.jpg",
   "/img/2_1x.jpg",
   "/img/3_1x.jpg",
@@ -55,22 +55,28 @@ self.addEventListener("fetch", function(event) {
       }
 
       var fetchRequest = event.request.clone();
-      return fetch(fetchRequest).then(function(response) {
-        // Check if we received a valid response
-        if (!response || response.status !== 200 || response.type !== "basic") {
+      return fetch(fetchRequest)
+        .then(function(response) {
+          // Check if we received a valid response
+          if (
+            !response ||
+            response.status !== 200 ||
+            response.type !== "basic"
+          ) {
+            return response;
+          }
+
+          var responseToCache = response.clone();
+
+          if (fetchRequest.method === "GET") {
+            caches.open(CACHE_NAME).then(function(cache) {
+              cache.put(event.request, responseToCache);
+            });
+          }
+
           return response;
-        }
-
-        var responseToCache = response.clone();
-
-        if (fetchRequest.method === "GET") {
-          caches.open(CACHE_NAME).then(function(cache) {
-            cache.put(event.request, responseToCache);
-          });
-        }
-
-        return response;
-      });
+        })
+        .catch(error => console.log(error));
     })
   );
 });

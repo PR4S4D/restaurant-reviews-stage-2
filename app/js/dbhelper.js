@@ -23,10 +23,13 @@ class DBHelper {
             callback("API call failed", null);
             return;
           }
-          response.json().then(data => {
-            updateCache(data);
-            callback(null, data);
-          });
+          response
+            .json()
+            .then(data => {
+              updateCache(data);
+              callback(null, data);
+            })
+            .catch(error => callback(error, null));
         })
         .catch(error => callback(error, null));
     });
@@ -210,7 +213,7 @@ updateCache = restaurants => {
 
     //Delete old restaurants data
     store
-      .index("updateAt")
+      .index("updatedAt")
       .openCursor(null, "prev")
       .then(cursor => {
         if (!cursor) return;
@@ -219,6 +222,7 @@ updateCache = restaurants => {
       .then(function deleteRest(cursor) {
         if (!cursor) return;
 
+        console.log("Deleting data", cursor);
         cursor.delete();
         return cursor.continue().then(deleteRest);
       });
@@ -231,23 +235,24 @@ getDBPromise = () => {
     return Promise.resolve();
   }
 
-  return idb.open("restaurants-db", 2, upgradeDB => {
+  return idb.open("restaurants-db", 5, upgradeDB => {
     let store = upgradeDB.createObjectStore(RESTAURANTS, { keyPath: "id" });
-    store.createIndex("updateAt", "updatedAt");
+    store.createIndex("updatedAt", "updatedAt");
   });
 };
 
 showCachedMessages = callback => {
-  getDBPromise().then(db => {
+  return getDBPromise().then(db => {
     let index = db
       .transaction(RESTAURANTS)
       .objectStore(RESTAURANTS)
-      .index("updateAt");
+      .index("updatedAt");
     return index.getAll().then(restaurants => {
-      if (!restaurants) callback(null, restaurants);
+      if (restaurants && restaurants.length > 0) {
+        callback(null, restaurants);
+      }
     });
   });
-  return Promise.resolve();
 };
 
 /* Index Db end */

@@ -3,6 +3,7 @@
 //   cuisines
 var newMap;
 var markers = [];
+var observer;
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -21,7 +22,7 @@ fetchNeighborhoods = () => {
   DBHelper.fetchNeighborhoods((error, neighborhoods) => {
     if (error) {
       // Got an error
-      console.error(error);
+      console.warn(error);
     } else {
       self.neighborhoods = neighborhoods;
       fillNeighborhoodsHTML();
@@ -49,7 +50,7 @@ fetchCuisines = () => {
   DBHelper.fetchCuisines((error, cuisines) => {
     if (error) {
       // Got an error!
-      console.error(error);
+      console.warn(error);
     } else {
       self.cuisines = cuisines;
       fillCuisinesHTML();
@@ -118,7 +119,7 @@ updateRestaurants = () => {
     (error, restaurants) => {
       if (error) {
         // Got an error!
-        console.error(error);
+        console.log(error);
       } else {
         resetRestaurants(restaurants);
         fillRestaurantsHTML();
@@ -150,6 +151,7 @@ resetRestaurants = restaurants => {
 fillRestaurantsHTML = (restaurants = self.restaurants) => {
   const ul = document.getElementById("restaurants-list");
   restaurants.forEach(restaurant => {
+    observer.observe();
     ul.append(createRestaurantHTML(restaurant));
   });
   addMarkersToMap();
@@ -205,6 +207,8 @@ addMarkersToMap = (restaurants = self.restaurants) => {
 };
 
 lazyLoading = () => {
-  const observer = lozad(); // lazy loads elements with default selector as '.lozad'
+  observer = lozad(".lozad", {
+    threshold: 0.1
+  });
   observer.observe();
 };

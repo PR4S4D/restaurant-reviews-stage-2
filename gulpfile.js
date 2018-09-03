@@ -44,7 +44,7 @@ gulp.task("scripts", () => {
 // Copies sw.js to dev and production destination folders
 gulp.task("service-worker", () => {
   gulp
-    .src(["app/sw.js","app/manifest.json"])
+    .src(["app/sw.js", "app/manifest.json"])
     .pipe(gulp.dest(".tmp"))
     .pipe(gulp.dest("dist"));
 });
