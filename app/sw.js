@@ -1,4 +1,4 @@
-var CACHE_NAME = "restaurant-review-cache-10";
+var CACHE_NAME = "restaurant-review-cache-15";
 var urlsToCache = [
   "/",
   "/index.html",

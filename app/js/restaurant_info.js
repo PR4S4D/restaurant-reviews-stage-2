@@ -17,6 +17,11 @@ initMap = () => {
       // Got an error!
       console.error(error);
     } else {
+      if (self.newMap) {
+        self.newMap.off();
+        self.newMap.remove();
+      }
+
       self.newMap = L.map("map", {
         center: [restaurant.latlng.lat, restaurant.latlng.lng],
         zoom: 16,
@@ -103,6 +108,7 @@ fillRestaurantHoursHTML = (
   operatingHours = self.restaurant.operating_hours
 ) => {
   const hours = document.getElementById("restaurant-hours");
+  hours.innerHTML = "";
   for (let key in operatingHours) {
     const row = document.createElement("tr");
 
@@ -123,9 +129,8 @@ fillRestaurantHoursHTML = (
  */
 fillReviewsHTML = (reviews = self.restaurant.reviews) => {
   const container = document.getElementById("reviews-container");
-  const title = document.createElement("h3");
+  const title = document.getElementById("reviews-title");
   title.innerHTML = "Reviews";
-  container.appendChild(title);
 
   if (!reviews) {
     const noReviews = document.createElement("p");
@@ -134,6 +139,7 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     return;
   }
   const ul = document.getElementById("reviews-list");
+  ul.innerHTML = "";
   reviews.forEach(review => {
     ul.appendChild(createReviewHTML(review));
   });
@@ -173,10 +179,8 @@ createReviewHTML = review => {
  * Add restaurant name to the breadcrumb navigation menu
  */
 fillBreadcrumb = (restaurant = self.restaurant) => {
-  const breadcrumb = document.getElementById("breadcrumb");
-  const li = document.createElement("li");
-  li.innerHTML = restaurant.name;
-  breadcrumb.appendChild(li);
+  const restaurantNav = document.getElementById("restaurant-label");
+  restaurantNav.innerHTML = restaurant.name;
 };
 
 /**
